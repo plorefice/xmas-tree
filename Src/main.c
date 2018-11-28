@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 
 #include "main.h"
 #include "stm32l0xx_hal.h"
@@ -7,17 +8,39 @@
 #define MAX_BRIGHTNESS 32
 #define MAX_LEDS_ON    8
 
+struct animation {
+  union {
+    /* Pulse animation */
+    struct pulse_data {
+      uint16_t period;
+    } pulse;
+  } data;
+
+  uint16_t (*at)(uint32_t time_ms, void *anim_data);
+};
+
 struct led {
   uint8_t index;
 
   uint16_t brightness;
   uint16_t time_on;
+
+  struct animation anim;
 };
 
 struct led_pin_mapping {
   GPIO_TypeDef *port;
   uint16_t      pin;
 };
+
+static uint16_t pulse_at(uint32_t time_ms, void *anim_data)
+{
+  struct pulse_data *pulse = anim_data;
+  uint16_t semi_per = pulse->period >> 1;
+  int rem = semi_per - abs((time_ms % pulse->period) - semi_per);
+
+  return MAX_BRIGHTNESS * (rem * 100 / semi_per) / 100;
+}
 
 static const struct led_pin_mapping led_map[] = {
   [0]  = { .port = LED_0_GPIO_Port,  .pin = LED_0_Pin  },
@@ -77,6 +100,9 @@ int main(void)
     leds[i].index = i;
     leds[i].brightness = rand() % (MAX_BRIGHTNESS / 2);
     leds[i].time_on = 0;
+
+    leds[i].anim.data.pulse.period = 3000;
+    leds[i].anim.at = pulse_at;
   }
 
   /* Start LED timer */
@@ -106,8 +132,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     }
     
     if ((iter = (iter + 1) % MAX_BRIGHTNESS) == 0)
-      for (int i = 0; i < NUM_LEDS; i++)
+      for (int i = 0; i < NUM_LEDS; i++) {
+        leds[i].brightness = leds[i].anim.at(HAL_GetTick(), &leds[i].anim.data);
         leds[i].time_on = 0;
+      }
   }
 }
 

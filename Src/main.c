@@ -1,5 +1,48 @@
+#include <stdlib.h>
+
 #include "main.h"
 #include "stm32l0xx_hal.h"
+
+#define NUM_LEDS       20
+#define MAX_BRIGHTNESS 32
+#define MAX_LEDS_ON    8
+
+struct led {
+  uint8_t index;
+
+  uint16_t brightness;
+  uint16_t time_on;
+};
+
+struct led_pin_mapping {
+  GPIO_TypeDef *port;
+  uint16_t      pin;
+};
+
+static const struct led_pin_mapping led_map[] = {
+  [0]  = { .port = LED_0_GPIO_Port,  .pin = LED_0_Pin  },
+  [1]  = { .port = LED_1_GPIO_Port,  .pin = LED_1_Pin  },
+  [2]  = { .port = LED_2_GPIO_Port,  .pin = LED_2_Pin  },
+  [3]  = { .port = LED_3_GPIO_Port,  .pin = LED_3_Pin  },
+  [4]  = { .port = LED_4_GPIO_Port,  .pin = LED_4_Pin  },
+  [5]  = { .port = LED_5_GPIO_Port,  .pin = LED_5_Pin  },
+  [6]  = { .port = LED_6_GPIO_Port,  .pin = LED_6_Pin  },
+  [7]  = { .port = LED_7_GPIO_Port,  .pin = LED_7_Pin  },
+  [8]  = { .port = LED_8_GPIO_Port,  .pin = LED_8_Pin  },
+  [9]  = { .port = LED_9_GPIO_Port,  .pin = LED_9_Pin  },
+  [10] = { .port = LED_10_GPIO_Port, .pin = LED_10_Pin },
+  [11] = { .port = LED_11_GPIO_Port, .pin = LED_11_Pin },
+  [12] = { .port = LED_12_GPIO_Port, .pin = LED_12_Pin },
+  [13] = { .port = LED_13_GPIO_Port, .pin = LED_13_Pin },
+  [14] = { .port = LED_14_GPIO_Port, .pin = LED_14_Pin },
+  [15] = { .port = LED_15_GPIO_Port, .pin = LED_15_Pin },
+  [16] = { .port = LED_16_GPIO_Port, .pin = LED_16_Pin },
+  [17] = { .port = LED_17_GPIO_Port, .pin = LED_17_Pin },
+  [18] = { .port = LED_18_GPIO_Port, .pin = LED_18_Pin },
+  [19] = { .port = LED_19_GPIO_Port, .pin = LED_19_Pin },
+};
+
+static struct led leds[NUM_LEDS];
 
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim21;
@@ -17,6 +60,9 @@ int main(void)
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
+  /* TODO: properly generate random seed */
+  srand(0);
+
   /* Configure the system clock */
   SystemClock_Config();
 
@@ -26,9 +72,42 @@ int main(void)
   MX_TIM21_Init();
   MX_USART2_UART_Init();
 
-  while (1) {
-    HAL_GPIO_TogglePin(LED_5_GPIO_Port, LED_5_Pin);
-    HAL_Delay(100);
+  /* Initialize all leds to random brightnesses */
+  for (int i = 0; i < NUM_LEDS; i++) {
+    leds[i].index = i;
+    leds[i].brightness = rand() % (MAX_BRIGHTNESS / 2);
+    leds[i].time_on = 0;
+  }
+
+  /* Start LED timer */
+  HAL_TIM_Base_Start_IT(&htim21);
+  
+  while (1)
+    ;
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  static int iter = 0;
+  int leds_on = 0;
+
+  if (htim->Instance == TIM21) {
+    for (int i = 0; i < NUM_LEDS; i++) {
+      struct led *led = &leds[i];
+
+      if (led->time_on < led->brightness && leds_on < MAX_LEDS_ON) {
+        led->time_on++;
+        leds_on++;
+
+        HAL_GPIO_WritePin(led_map[i].port, led_map[i].pin, GPIO_PIN_SET);
+      } else {
+        HAL_GPIO_WritePin(led_map[i].port, led_map[i].pin, GPIO_PIN_RESET);
+      }
+    }
+    
+    if ((iter = (iter + 1) % MAX_BRIGHTNESS) == 0)
+      for (int i = 0; i < NUM_LEDS; i++)
+        leds[i].time_on = 0;
   }
 }
 

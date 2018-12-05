@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include <math.h>
 
 #include "main.h"
@@ -72,11 +73,12 @@ TIM_HandleTypeDef htim21;
 UART_HandleTypeDef huart2;
 
 void SystemClock_Config(void);
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 static void MX_GPIO_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM21_Init(void);
 static void MX_USART2_UART_Init(void);
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+static bool is_button_pressed(void);
 
 int main(void)
 {
@@ -110,6 +112,27 @@ int main(void)
   
   while (1)
     ;
+}
+
+static bool is_button_pressed(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct;
+  uint32_t counter = 0;
+
+  GPIO_InitStruct.Pin = USER_BTN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(USER_BTN_GPIO_Port, &GPIO_InitStruct);
+
+  HAL_GPIO_WritePin(USER_BTN_GPIO_Port, USER_BTN_Pin, GPIO_PIN_SET);
+
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  HAL_GPIO_Init(USER_BTN_GPIO_Port, &GPIO_InitStruct);
+
+  while (HAL_GPIO_ReadPin(USER_BTN_GPIO_Port, USER_BTN_Pin) == GPIO_PIN_SET)
+    counter++;
+
+  return counter > 100;
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)

@@ -4,6 +4,7 @@
 
 #include "main.h"
 #include "stm32l0xx_hal.h"
+#include "jingles.h"
 
 #define NUM_LEDS       20
 #define MAX_BRIGHTNESS 32
@@ -109,9 +110,15 @@ int main(void)
 
   /* Start LED timer */
   HAL_TIM_Base_Start_IT(&htim21);
+
+  /* Start buzzer PWM */
+  HAL_TIM_Base_Start(&htim2);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
   
-  while (1)
-    ;
+  while (1) {
+    if (is_button_pressed())
+      jingle_start(JINGLE_BELLS);
+  }
 }
 
 static bool is_button_pressed(void)
@@ -133,6 +140,11 @@ static bool is_button_pressed(void)
     counter++;
 
   return counter > 100;
+}
+
+void HAL_SYSTICK_Callback(void)
+{
+  jingle_update();
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)

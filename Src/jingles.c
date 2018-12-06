@@ -15,7 +15,7 @@ struct Jingle {
 
 static const struct Jingle jingles[] = {
   [JINGLE_BELLS] = {
-    .melody = (uint16_t []){
+    .melody = (const uint16_t []){
       D3, B3, A3, G3, D3, D3, D3, D3, B3, A3, G3, E3, 0,
       E3, C4, B3, A3, FS3, 0, D4, D4, C4, A3, B3, 0, D3,
       B3, A3, G3, D3, D3, D3, D3, B3, A3, G3, E3, E3, E3,
@@ -26,7 +26,7 @@ static const struct Jingle jingles[] = {
       B3, B3, B3, B3, B3, B3, B3, D4, G3, A3, B3, 0,
       C4, C4, C4, C4, C4, B3, B3, B3, B3, D4, D4, C4, A3, G3, 0
     },
-    .durations = (uint8_t []){
+    .durations = (const uint8_t []){
       8, 8, 8, 8, 3, 16, 16, 8, 8, 8, 8, 3, 8,
       8, 8, 8, 8, 3, 8, 8, 8, 8, 8, 3, 8, 8,
       8, 8, 8, 3, 16, 16, 8, 8, 8, 8, 3, 8, 8,

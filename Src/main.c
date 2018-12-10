@@ -9,7 +9,7 @@
 
 #define NUM_LEDS       20
 #define MAX_BRIGHTNESS 32
-#define MAX_LEDS_ON    8
+#define MAX_LEDS_ON    20
 
 struct animation {
   union {
@@ -17,10 +17,31 @@ struct animation {
     struct pulse_data {
       uint16_t period;
     } pulse;
+
+    /* Blink animation */
+    struct blink_data {
+      uint8_t initial_state;
+    } blink;
   } data;
 
   uint16_t (*at)(uint32_t time_ms, void *anim_data);
 };
+
+static uint16_t blink_at(uint32_t time_ms, void *anim_data)
+{
+  struct blink_data *blink = anim_data;
+  uint32_t on = ((time_ms & 0x400) >> 10) ^ blink->initial_state;
+  return MAX_BRIGHTNESS * on;
+}
+
+static uint16_t pulse_at(uint32_t time_ms, void *anim_data)
+{
+  struct pulse_data *pulse = anim_data;
+  uint16_t semi_per = pulse->period >> 1;
+  int rem = semi_per - abs((time_ms % pulse->period) - semi_per);
+
+  return MAX_BRIGHTNESS * (rem * 100 / semi_per) / 100;
+}
 
 struct led {
   uint8_t index;
@@ -35,15 +56,6 @@ struct led_pin_mapping {
   GPIO_TypeDef *port;
   uint16_t      pin;
 };
-
-static uint16_t pulse_at(uint32_t time_ms, void *anim_data)
-{
-  struct pulse_data *pulse = anim_data;
-  uint16_t semi_per = pulse->period >> 1;
-  int rem = semi_per - abs((time_ms % pulse->period) - semi_per);
-
-  return MAX_BRIGHTNESS * (rem * 100 / semi_per) / 100;
-}
 
 static const struct led_pin_mapping led_map[] = {
   [0]  = { .port = LED_0_GPIO_Port,  .pin = LED_0_Pin  },

@@ -37,6 +37,7 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 Src/main.c \
+Src/button.c \
 Src/jingles.c \
 Src/stm32l0xx_it.c \
 Src/stm32l0xx_hal_msp.c \

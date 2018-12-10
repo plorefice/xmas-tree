@@ -55,10 +55,17 @@ void jingle_start(enum JingleId jingle)
 
 void jingle_stop(void)
 {
+  __HAL_TIM_SetAutoreload(&htim2, 0);
+
   playing = false;
   current_note = 0;
   next_note_time = 0;
   next_is_silence = false;
+}
+
+bool jingle_is_playing(void)
+{
+  return playing;
 }
 
 void jingle_update(void)

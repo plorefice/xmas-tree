@@ -9,5 +9,6 @@ enum JingleId {
 void jingle_start(enum JingleId jingle);
 void jingle_stop(void);
 void jingle_update(void);
+bool jingle_is_playing(void);
 
 #endif /* __JINGLES_H__ */

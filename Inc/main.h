@@ -48,6 +48,9 @@
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
+#define NUM_LEDS       20
+#define MAX_BRIGHTNESS 32
+#define MAX_LEDS_ON    20
 
 #define USER_BTN_Pin GPIO_PIN_14
 #define USER_BTN_GPIO_Port GPIOC

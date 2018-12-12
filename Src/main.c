@@ -4,44 +4,9 @@
 
 #include "main.h"
 #include "stm32l0xx_hal.h"
+#include "animation.h"
 #include "jingles.h"
 #include "button.h"
-
-#define NUM_LEDS       20
-#define MAX_BRIGHTNESS 32
-#define MAX_LEDS_ON    20
-
-struct animation {
-  union {
-    /* Pulse animation */
-    struct pulse_data {
-      uint16_t period;
-    } pulse;
-
-    /* Blink animation */
-    struct blink_data {
-      uint8_t initial_state;
-    } blink;
-  } data;
-
-  uint16_t (*at)(uint32_t time_ms, void *anim_data);
-};
-
-static uint16_t blink_at(uint32_t time_ms, void *anim_data)
-{
-  struct blink_data *blink = anim_data;
-  uint32_t on = ((time_ms & 0x400) >> 10) ^ blink->initial_state;
-  return MAX_BRIGHTNESS * on;
-}
-
-static uint16_t pulse_at(uint32_t time_ms, void *anim_data)
-{
-  struct pulse_data *pulse = anim_data;
-  uint16_t semi_per = pulse->period >> 1;
-  int rem = semi_per - abs((time_ms % pulse->period) - semi_per);
-
-  return MAX_BRIGHTNESS * (rem * 100 / semi_per) / 100;
-}
 
 struct led {
   uint8_t index;
@@ -95,6 +60,8 @@ static void MX_USART2_UART_Init(void);
 
 int main(void)
 {
+  enum animations current_anim = ANIM_PULSE;
+
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
@@ -116,8 +83,7 @@ int main(void)
     leds[i].brightness = rand() % (MAX_BRIGHTNESS / 2);
     leds[i].time_on = 0;
 
-    leds[i].anim.data.pulse.period = 3000;
-    leds[i].anim.at = pulse_at;
+    animation_switch_to(&leds[i].anim, current_anim);
   }
 
   /* Start LED timer */
@@ -135,6 +101,11 @@ int main(void)
         jingle_stop();
       else
         jingle_start(JINGLE_BELLS);
+    } else if (duration >= BUTTON_SHORT_PRESS) {
+      current_anim = (current_anim + 1) % NUM_ANIMATIONS;
+
+      for (int i = 0; i < NUM_LEDS; i++)
+        animation_switch_to(&leds[i].anim, current_anim);
     }
   }
 }

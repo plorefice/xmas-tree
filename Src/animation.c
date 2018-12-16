@@ -33,10 +33,21 @@ static uint16_t breathe_at(uint32_t time_ms, void *anim_data)
   return MAX_BRIGHTNESS * (rem * 100 / semi_per) / 100;
 }
 
+static const uint8_t blink_initial_on[] = {
+  3, 18, 1, 15, 14, 5, 11, 7, 9, 13
+};
+
 static void blink_init(uint8_t led, void *anim_data)
 {
   struct blink_data *blink = anim_data;
-  blink->initial_state = rand() % 2;
+
+  for (uint8_t i = 0; i < sizeof(blink_initial_on); i++)
+    if (led == blink_initial_on[i]) {
+      blink->initial_state = 1;
+      return;
+    }
+
+  blink->initial_state = 0;
 }
 
 static uint16_t blink_at(uint32_t time_ms, void *anim_data)

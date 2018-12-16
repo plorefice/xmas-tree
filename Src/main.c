@@ -61,6 +61,7 @@ static void MX_USART2_UART_Init(void);
 int main(void)
 {
   enum animations current_anim = ANIM_PULSE;
+  enum jingle_id current_jingle = NO_JINGLE;
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
@@ -80,7 +81,6 @@ int main(void)
   /* Initialize all leds to random brightnesses */
   for (int i = 0; i < NUM_LEDS; i++) {
     leds[i].index = i;
-    leds[i].brightness = rand() % (MAX_BRIGHTNESS / 2);
     leds[i].time_on = 0;
 
     animation_switch_to(i, &leds[i].anim, current_anim);
@@ -97,10 +97,11 @@ int main(void)
     int duration = button_detect_press();
 
     if (duration >= BUTTON_LONG_PRESS) {
-      if (jingle_is_playing())
-        jingle_stop();
-      else
-        jingle_start(JINGLE_BELLS);
+      current_jingle = (current_jingle + 1) % NUM_JINGLES;
+      jingle_stop();
+
+      if (current_jingle != NO_JINGLE)
+        jingle_start(current_jingle);
     } else if (duration >= BUTTON_SHORT_PRESS) {
       current_anim = (current_anim + 1) % NUM_ANIMATIONS;
 
@@ -134,7 +135,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
       }
     }
     
-    if ((iter = (iter + 1) % MAX_BRIGHTNESS) == 0)
+    if ((iter = (iter + 1) % BRIGHTNESS_STEPS) == 0)
       for (int i = 0; i < NUM_LEDS; i++) {
         leds[i].brightness = leds[i].anim.at(HAL_GetTick(), &leds[i].anim.data);
         leds[i].time_on = 0;

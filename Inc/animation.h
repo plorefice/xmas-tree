@@ -5,6 +5,7 @@
 
 enum animations {
   ANIM_PULSE = 0,
+  ANIM_BREATHE,
   ANIM_BLINK,
   ANIM_SNOWFALL,
   NUM_ANIMATIONS,
@@ -20,11 +21,18 @@ struct animation {
       uint16_t period;
     } pulse;
 
+    /* Breathe animation */
+    struct breathe_data {
+      uint16_t period;
+      uint16_t phase;
+    } breathe;
+
     /* Blink animation */
     struct blink_data {
       uint8_t initial_state;
     } blink;
 
+    /* Snowfall animation */
     struct snowfall_data {
       uint8_t layer;
     } snowfall;

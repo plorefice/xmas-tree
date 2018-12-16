@@ -2,20 +2,6 @@
 #include "animation.h"
 #include "main.h"
 
-static void blink_init(uint8_t led, void *anim_data)
-{
-  struct blink_data *blink = anim_data;
-  blink->initial_state = rand() % 2;
-}
-
-static uint16_t blink_at(uint32_t time_ms, void *anim_data)
-{
-  struct blink_data *blink = anim_data;
-  uint32_t on = ((time_ms & 0x400) >> 10) ^ blink->initial_state;
-
-  return MAX_BRIGHTNESS * on;
-}
-
 static void pulse_init(uint8_t led, void *anim_data)
 {
   struct pulse_data *pulse = anim_data;
@@ -29,6 +15,36 @@ static uint16_t pulse_at(uint32_t time_ms, void *anim_data)
   int rem = semi_per - abs((time_ms % pulse->period) - semi_per);
 
   return MAX_BRIGHTNESS * (rem * 100 / semi_per) / 100;
+}
+
+static void breathe_init(uint8_t led, void *anim_data)
+{
+  struct breathe_data *breathe = anim_data;
+  breathe->period = 3000;
+  breathe->phase = rand() % 3000;
+}
+
+static uint16_t breathe_at(uint32_t time_ms, void *anim_data)
+{
+  struct breathe_data *breathe = anim_data;
+  uint16_t semi_per = breathe->period >> 1;
+  int rem = semi_per - abs(((time_ms + breathe->phase) % breathe->period) - semi_per);
+
+  return MAX_BRIGHTNESS * (rem * 100 / semi_per) / 100;
+}
+
+static void blink_init(uint8_t led, void *anim_data)
+{
+  struct blink_data *blink = anim_data;
+  blink->initial_state = rand() % 2;
+}
+
+static uint16_t blink_at(uint32_t time_ms, void *anim_data)
+{
+  struct blink_data *blink = anim_data;
+  uint32_t on = ((time_ms & 0x400) >> 10) ^ blink->initial_state;
+
+  return MAX_BRIGHTNESS * on;
 }
 
 static void snowfall_init(uint8_t led, void *anim_data)
@@ -66,12 +82,14 @@ static uint16_t snowfall_at(uint32_t time_ms, void *anim_data)
 
 static const anim_init_fn anim_init_fns[] = {
   [ANIM_PULSE] = pulse_init,
+  [ANIM_BREATHE] = breathe_init,
   [ANIM_BLINK] = blink_init,
   [ANIM_SNOWFALL] = snowfall_init,
 };
 
 static const anim_fn anim_fns[] = {
   [ANIM_PULSE] = pulse_at,
+  [ANIM_BREATHE] = breathe_at,
   [ANIM_BLINK] = blink_at,
   [ANIM_SNOWFALL] = snowfall_at,
 };

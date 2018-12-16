@@ -87,20 +87,44 @@ static uint16_t snowfall_pers_at(uint32_t time_ms, void *anim_data)
   return MAX_BRIGHTNESS * (snowfall->layer <= idx);
 }
 
+static const uint8_t slide_led_order[] = {
+  3, 5, 4, 12, 2, 6, 18, 11, 1, 7, 17, 10, 0, 19, 15, 9, 14, 13, 16, 8
+};
+
+static void slide_init(uint8_t led, void *anim_data)
+{
+  struct slide_data *slide = anim_data;
+
+  for (uint8_t i = 0; i < sizeof(slide_led_order); i++)
+    if (led == slide_led_order[i]) {
+      slide->position = i;
+      return;
+    }
+}
+
+static uint16_t slide_at(uint32_t time_ms, void *anim_data)
+{
+  struct slide_data *slide = anim_data;
+  uint16_t idx = time_ms % 5000 / 200;
+  return MAX_BRIGHTNESS * (slide->position <= idx);
+}
+
 static const anim_init_fn anim_init_fns[] = {
-  [ANIM_PULSE] = pulse_init,
-  [ANIM_BREATHE] = breathe_init,
-  [ANIM_BLINK] = blink_init,
-  [ANIM_SNOWFALL] = snowfall_init,
+  [ANIM_PULSE]         = pulse_init,
+  [ANIM_BREATHE]       = breathe_init,
+  [ANIM_BLINK]         = blink_init,
+  [ANIM_SNOWFALL]      = snowfall_init,
   [ANIM_SNOWFALL_PERS] = snowfall_init,
+  [ANIM_SLIDE]         = slide_init,
 };
 
 static const anim_fn anim_fns[] = {
-  [ANIM_PULSE] = pulse_at,
-  [ANIM_BREATHE] = breathe_at,
-  [ANIM_BLINK] = blink_at,
-  [ANIM_SNOWFALL] = snowfall_at,
+  [ANIM_PULSE]         = pulse_at,
+  [ANIM_BREATHE]       = breathe_at,
+  [ANIM_BLINK]         = blink_at,
+  [ANIM_SNOWFALL]      = snowfall_at,
   [ANIM_SNOWFALL_PERS] = snowfall_pers_at,
+  [ANIM_SLIDE]         = slide_at,
 };
 
 void animation_switch_to(uint8_t led, struct animation *anim, enum animations id) {

@@ -9,6 +9,7 @@ enum animations {
   ANIM_BLINK,
   ANIM_SNOWFALL,
   ANIM_SNOWFALL_PERS,
+  ANIM_SLIDE,
   NUM_ANIMATIONS,
 };
 
@@ -37,6 +38,11 @@ struct animation {
     struct snowfall_data {
       uint8_t layer;
     } snowfall;
+
+    /* Slide animation */
+    struct slide_data {
+      uint8_t position;
+    } slide;
   } data;
 
   anim_fn at;

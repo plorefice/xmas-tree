@@ -80,11 +80,19 @@ static uint16_t snowfall_at(uint32_t time_ms, void *anim_data)
   return MAX_BRIGHTNESS * (idx == snowfall->layer);
 }
 
+static uint16_t snowfall_pers_at(uint32_t time_ms, void *anim_data)
+{
+  struct snowfall_data *snowfall = anim_data;
+  uint16_t idx = time_ms % 2000 / 200;
+  return MAX_BRIGHTNESS * (snowfall->layer <= idx);
+}
+
 static const anim_init_fn anim_init_fns[] = {
   [ANIM_PULSE] = pulse_init,
   [ANIM_BREATHE] = breathe_init,
   [ANIM_BLINK] = blink_init,
   [ANIM_SNOWFALL] = snowfall_init,
+  [ANIM_SNOWFALL_PERS] = snowfall_init,
 };
 
 static const anim_fn anim_fns[] = {
@@ -92,6 +100,7 @@ static const anim_fn anim_fns[] = {
   [ANIM_BREATHE] = breathe_at,
   [ANIM_BLINK] = blink_at,
   [ANIM_SNOWFALL] = snowfall_at,
+  [ANIM_SNOWFALL_PERS] = snowfall_pers_at,
 };
 
 void animation_switch_to(uint8_t led, struct animation *anim, enum animations id) {

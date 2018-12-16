@@ -8,6 +8,7 @@ enum animations {
   ANIM_BREATHE,
   ANIM_BLINK,
   ANIM_SNOWFALL,
+  ANIM_SNOWFALL_PERS,
   NUM_ANIMATIONS,
 };
 

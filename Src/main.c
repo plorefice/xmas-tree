@@ -83,7 +83,7 @@ int main(void)
     leds[i].brightness = rand() % (MAX_BRIGHTNESS / 2);
     leds[i].time_on = 0;
 
-    animation_switch_to(&leds[i].anim, current_anim);
+    animation_switch_to(i, &leds[i].anim, current_anim);
   }
 
   /* Start LED timer */
@@ -105,7 +105,7 @@ int main(void)
       current_anim = (current_anim + 1) % NUM_ANIMATIONS;
 
       for (int i = 0; i < NUM_LEDS; i++)
-        animation_switch_to(&leds[i].anim, current_anim);
+        animation_switch_to(i, &leds[i].anim, current_anim);
     }
   }
 }

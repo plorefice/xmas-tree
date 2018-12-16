@@ -6,11 +6,12 @@
 enum animations {
   ANIM_PULSE = 0,
   ANIM_BLINK,
+  ANIM_SNOWFALL,
   NUM_ANIMATIONS,
 };
 
+typedef void (*anim_init_fn)(uint8_t, void *);
 typedef uint16_t (*anim_fn)(uint32_t, void *);
-typedef void (*anim_init_fn)(void *);
 
 struct animation {
   union {
@@ -23,11 +24,15 @@ struct animation {
     struct blink_data {
       uint8_t initial_state;
     } blink;
+
+    struct snowfall_data {
+      uint8_t layer;
+    } snowfall;
   } data;
 
   anim_fn at;
 };
 
-void animation_switch_to(struct animation *anim, enum animations id);
+void animation_switch_to(uint8_t led, struct animation *anim, enum animations id);
 
 #endif

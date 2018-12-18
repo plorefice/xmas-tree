@@ -5,12 +5,19 @@
 #include "jingles.h"
 #include "pitch.h"
 
-#define S   4*Q
-#define EE  E*4/3
-#define E   2*Q
-#define Q   8
-#define H   Q/2
-#define W   Q/4
+// Note duration: N / bpm
+#define W    240
+#define H    120
+#define Q    60
+#define E    30
+#define S    15
+#define DH   180
+#define DQ   90
+#define DE   45
+#define DS   22
+#define TQ   40
+#define TE   15
+#define TS   10
 
 extern TIM_HandleTypeDef htim2;
 
@@ -18,6 +25,7 @@ struct jingle {
   const uint16_t *melody;
   const uint8_t *durations;
   const uint16_t length;
+  const uint16_t bpm;
 };
 
 static const struct jingle jingles[] = {
@@ -31,56 +39,98 @@ static const struct jingle jingles[] = {
       B3, B3, B3, B3, B3, B3, B3, D4, G3, A3, B3, 0,
       C4, C4, C4, C4, C4, B3, B3, B3, B3, B3, A3, A3, B3, A3, D4,
       B3, B3, B3, B3, B3, B3, B3, D4, G3, A3, B3, 0,
-      C4, C4, C4, C4, C4, B3, B3, B3, B3, D4, D4, C4, A3, G3, 0
+      C4, C4, C4, C4, C4, B3, B3, B3, B3, D4, D4, C4, A3, G3, 0, 0,
     },
     .durations = (const uint8_t []){
-      8, 8, 8, 8, 3, 16, 16, 8, 8, 8, 8, 3, 8,
-      8, 8, 8, 8, 3, 8, 8, 8, 8, 8, 3, 8, 8,
-      8, 8, 8, 3, 16, 16, 8, 8, 8, 8, 3, 8, 8,
-      8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4,
+      Q, Q, Q, Q, DH, E, E, Q, Q, Q, Q, DH, Q,
+      Q, Q, Q, Q, DH, Q, Q, Q, Q, Q, DH, Q, Q,
+      Q, Q, Q, DH, E, E, Q, Q, Q, Q, DH, Q, Q,
+      Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H, H,
 
-      8, 8, 4, 8, 8, 4, 8, 8, 6, 16, 3, 8,
-      8, 8, 6, 16, 8, 8, 8, 16, 16, 8, 8, 8, 8, 4, 4,
-      8, 8, 4, 8, 8, 4, 8, 8, 6, 16, 3, 8,
-      8, 8, 6, 16, 8, 8, 8, 16, 16, 8, 8, 8, 8, 2, 1
+      Q, Q, H, Q, Q, H, Q, Q, DQ, E, DH, Q,
+      Q, Q, DQ, E, Q, Q, Q, E, E, Q, Q, Q, Q, H, H,
+      Q, Q, H, Q, Q, H, Q, Q, DQ, E, DH, Q,
+      Q, Q, DQ, E, Q, Q, Q, E, E, Q, Q, Q, Q, W, W, W,
     },
-    .length = 106,
+    .length = 107,
+    .bpm = 240,
   },
 
   [IMPERIAL_MARCH] = {
     .melody = (const uint16_t []){
-      G3, G3, G3, E3, AS3, G3, E3, AS3, G3, D4, D4, D4, DS4,
-      AS3, G3, E3, AS3, G3, G4, G3, G3, G4, FS4, F4, E4, DS4,
-      E4, 0, GS3, CS4, C4, B3, B3, A3, B3, 0, E3, FS3, E3,
-      G3, AS3, G3, AS3, D4, G4, G3, G3, G4, FS4, F4, E4, DS4,
-      E4, 0, GS3, CS4, C4, B3, B3, A3, B3, 0, E3, FS3, E3,
-      AS3, G3, E3, AS3, G3, 0,
+      G3, G3, G3, E3, AS3, G3, E3, AS3, G3, D4, D4, D4, DS4, AS3,
+      FS3, DS3, AS3, G3, G4, G3, G3, G4, FS4, F4, E4, DS4, E4, 0,
+      GS3, CS4, C4, B3, B3, A3, B3, 0, E3, FS3, E3, G3, AS3, G3,
+      AS3, D4, G4, G3, G3, G4, FS4, F4, E4, DS4, E4, 0, GS3, CS4,
+      C4, B3, B3, A3, B3, 0, E3, FS3, E3, AS3, G3, E3, AS3, G3, 0, 0,
     },
     .durations = (const uint8_t []){
-      4, 4, 4, 6, 12, 4, 6, 12, 2, 4, 4, 4, 6, 12, 4, 6, 12,
-      2, 4, 6, 12, 4, 6, 12, 16, 16, 8, 8, 8, 4, 6, 12, 16,
-      16, 8, 8, 8, 4, 6, 12, 4, 6, 12, 2, 4, 6, 12, 4, 6, 12,
-      16, 16, 8, 8, 8, 4, 6, 12, 16, 16, 8, 8, 8, 4, 6, 12,
-      4, 6, 12, 2, 1,
+      Q, Q, Q, DE, TE, Q, DE, TE, H, Q, Q, Q, DE, TE, Q, DE, TE, H,
+      Q, DE, TE, Q, DE, TE, S, S, E, E, E, Q, DE, TE, S, S, E, E, E,
+      Q, DE, TE, Q, DE, TE, H, Q, DE, TE, Q, DE, TE, S, S, E, E, E,
+      Q, DE, TE, S, S, E, E, E, Q, DE, TE, Q, DE, TE, H, W, W,
     },
-    .length = 71,
+    .length = 72,
+    .bpm = 105,
   },
 
   [SUPER_MARIO] = {
     .melody = (const uint16_t []){
-      E4, E4, E4, C4, E4, G4, G3, C4, G3, E3, A3, B3, AS3, A3, G3,
-      E4, G4, A4, F4, G4, E4, C4, D4, B3, C4, G3, E3, A3, B3, AS3,
-      A3, G3, E4, G4, A4, F4, G4, E4, C4, D4, B3, G4, FS4, F4, DS4,
-      E4, GS3, A3, C4, A3, C4, D4, G4, FS4, F4, DS4, E4, A4, A4,
-      A4, G4, FS4, F4, DS4, E4, GS3, A3, C4, A3, C4, D4, DS4, D4, C4, 0
+      E4, E4, 0, E4, 0, C4, E4, 0, G4, 0, 0, F3, 0, 0,
+
+      C4, 0, 0, F3, 0, E3, 0, 0, A3, 0, B3, 0, AS3, A3, 0, G3, E4,
+      G4, A4, 0, F4, G4, 0, E4, 0, C4, D4, B3, 0,
+
+      C4, 0, 0, F3, 0, E3, 0, 0, A3, 0, B3, 0, AS3, A3, 0, G3, E4,
+      G4, A4, 0, F4, G4, 0, E4, 0, C4, D4, B3, 0,
+
+      0, G4, FS4, F4, DS4, 0, E4, 0, GS3, A3, C4, 0, A3, C4, D4,
+      0, G4, FS4, F4, DS4, 0, E4, 0, C5, 0, C5, C5, 0, 0,
+
+      0, G4, FS4, F4, DS4, 0, E4, 0, GS3, A3, C4, 0, A3, C4, D4,
+      0, DS4, 0, 0, D4, 0, C4, 0, 0, 0,
+
+      0, G4, FS4, F4, DS4, 0, E4, 0, GS3, A3, C4, 0, A3, C4, D4,
+      0, G4, FS4, F4, DS4, 0, E4, 0, C5, 0, C5, C5, 0, 0,
+
+      0, G4, FS4, F4, DS4, 0, E4, 0, GS3, A3, C4, 0, A3, C4, D4,
+      0, DS4, 0, 0, D4, 0, C4, 0, 0, 0,
+
+      C4, C4, 0, C4, 0, C4, D4, 0, E4, C4, 0, A3, G3, 0, 0,
+      C4, C4, 0, C4, 0, C4, D4, E4, 0, 0,
+
+      C4, C4, 0, C4, 0, C4, D4, 0, E4, C4, 0, A3, G3, 0, 0,
+      E4, E4, 0, E4, 0, C4, E4, 0, G4, 0, 0, F3, 0, 0,
     },
     .durations = (const uint8_t []){
-      E, Q, Q, E, Q, H, H, Q+E, Q+E, Q+E, Q, Q, E, Q, EE, EE, EE, Q, E,
-      Q, Q, E, E, Q+E, Q+E, Q+E, Q+E, Q, Q, E, Q, EE, EE, EE, Q, E, Q, Q,
-      E, E, Q+E, E, E, E, Q, Q, E, E, Q, E, E, Q+E, E, E, E, Q, Q, Q, E,
-      H, E, E, E, Q, Q, E, E, Q, E, E, Q+E, Q+S, Q+S, H, 1
+      Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H, Q, Q, H,
+
+      Q, Q, Q, Q, H, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q,
+      Q + 20, Q + 20, Q + 20, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H,
+
+      Q, Q, Q, Q, H, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q,
+      Q + 20, Q + 20, Q + 20, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H,
+
+      H, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q,
+      H, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H,
+
+      H, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q,
+      H, Q, Q, Q, Q, H, Q, Q, H, W,
+
+      H, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q,
+      H, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H,
+
+      H, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q,
+      H, Q, Q, Q, Q, H, Q, Q, H, W,
+
+      Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H,
+      Q, Q, Q, Q, Q, Q, Q, Q, W, W,
+
+      Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H,
+      Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H, Q, Q, H,
     },
-    .length = 75,
+    .length = 234,
+    .bpm = 390,
   }
 };
 
@@ -118,12 +168,12 @@ void jingle_update(void)
   if (!playing || next_note_time > now)
     return;
 
-  uint16_t dur = 2000 / curr_jingle->durations[current_note];
+  uint16_t dur = 1000 * curr_jingle->durations[current_note] / curr_jingle->bpm;
   uint32_t freq = 500000 / curr_jingle->melody[current_note];
 
   if (next_is_silence) {
     __HAL_TIM_SetAutoreload(&htim2, 0);
-    next_note_time = now + (dur / 10);
+    next_note_time = now + (dur / 20);
   } else {
     __HAL_TIM_SetAutoreload(&htim2, freq);
     __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, freq >> 1);

@@ -76,12 +76,12 @@ static const struct jingle jingles[] = {
 
   [SUPER_MARIO] = {
     .melody = (const uint16_t []){
-      E4, E4, 0, E4, 0, C4, E4, 0, G4, 0, 0, F3, 0, 0,
+      E4, E4, 0, E4, 0, C4, E4, 0, G4, 0, 0, G3, 0, 0,
 
-      C4, 0, 0, F3, 0, E3, 0, 0, A3, 0, B3, 0, AS3, A3, 0, G3, E4,
+      C4, 0, 0, G3, 0, E3, 0, 0, A3, 0, B3, 0, AS3, A3, 0, G3, E4,
       G4, A4, 0, F4, G4, 0, E4, 0, C4, D4, B3, 0,
 
-      C4, 0, 0, F3, 0, E3, 0, 0, A3, 0, B3, 0, AS3, A3, 0, G3, E4,
+      C4, 0, 0, G3, 0, E3, 0, 0, A3, 0, B3, 0, AS3, A3, 0, G3, E4,
       G4, A4, 0, F4, G4, 0, E4, 0, C4, D4, B3, 0,
 
       0, G4, FS4, F4, DS4, 0, E4, 0, GS3, A3, C4, 0, A3, C4, D4,
@@ -100,7 +100,7 @@ static const struct jingle jingles[] = {
       C4, C4, 0, C4, 0, C4, D4, E4, 0, 0,
 
       C4, C4, 0, C4, 0, C4, D4, 0, E4, C4, 0, A3, G3, 0, 0,
-      E4, E4, 0, E4, 0, C4, E4, 0, G4, 0, 0, F3, 0, 0,
+      E4, E4, 0, E4, 0, C4, E4, 0, G4, 0, 0, F3, 0, 0, 0, 0,
     },
     .durations = (const uint8_t []){
       Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H, Q, Q, H,
@@ -127,10 +127,10 @@ static const struct jingle jingles[] = {
       Q, Q, Q, Q, Q, Q, Q, Q, W, W,
 
       Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H,
-      Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H, Q, Q, H,
+      Q, Q, Q, Q, Q, Q, Q, Q, Q, Q, H, Q, Q, H, W, W,
     },
-    .length = 234,
-    .bpm = 390,
+    .length = 236,
+    .bpm = 400,
   }
 };
 
